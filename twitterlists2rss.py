@@ -66,10 +66,9 @@ def get_single_link(tweet_url):
     # numerical ID we are looking for
     try:
         tweet_id = int(tweet_id)
+        status = api.get_status(tweet_id)
     except:
         return None
-
-    status = api.get_status(tweet_id)
     
     if status.entities['urls']:
         return status.entities['urls'][0]['expanded_url']
