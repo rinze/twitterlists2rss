@@ -132,9 +132,20 @@ def process_tweet_items(list_items):
                  urls = urls,
                  image = image,
                  source_url = l.source_url)
-        if not only_links or (only_links and urls):
+        if (not only_links or (only_links and urls)) \
+           and links_allowed(urls):
             res.append(d)
     return(res)
+
+def links_allowed(urls):
+    """
+    Returns whether all urls are allowed or any contains a forbidden domain
+    """
+
+    match = any([any([urlparse(x).netloc.endswith(fd) \
+                 for fd in forbidden_domains]) \
+            for x in urls])
+    return not match
     
 def tweet_to_rss_item(tweet_data):
     """

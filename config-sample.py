@@ -28,3 +28,7 @@ prefix = 'rss-'
 
 # A list of searches to include. To disable, set it to None.
 get_searches = ["morning briefing from:nytimes"]
+
+# Domains for which you don't wish to be bothered about.
+# Disable with forbidden_domains = []
+forbidden_domains = ['paper.li']
