@@ -25,24 +25,30 @@ def recursive_link_extractor(url, n_deep = 5):
     origin = urlparse(url).netloc
 
     while (origin == "www.twitter.com" or origin == "twitter.com") \
-          and url and n_deep > 0:
+           and url and n_deep > 0:
               
         ref_tweet = url
-        url = get_single_link(url)        
+        ref_text, media_link, url = get_single_link(url)        
         if url:
             origin = urlparse(url).netloc
         n_deep = n_deep - 1
         
     # If we found some link, let's format it and return.
-    # If there was nothing, or we reached the bottom of the possible
-    # depth and didn't find anything, just return the original one in its
-    # original form.
+    # If there was nothing, or we reached the bottom of the allowed
+    # depth and didn't find anything, return the original link in its
+    # original form but write the text of the last retrieved one, if
+    # present.
     
     if not url or not ref_tweet or n_deep == 0:
         text = '<li><a href="%s">%s</a></li>' % (original_url, original_url)
     else:
-        text = '<li><a href="%s">%s</a> (from <a href="%s">%s</a>)</li>' % \
-               (url, url, ref_tweet, ref_tweet)
+        text = '<li><a href="%s">%s</a> (from <a href="%s">%s</a>: %s)' % \
+               (url, url, ref_tweet, ref_tweet, ref_text)
+        if media_link:
+            text += '<p><a href="%s"><img src="%s" /></a></p></li>' % \
+                    (media_link, media_link)
+        else:
+            text += "</li>"
                
     return(text)
     
@@ -54,7 +60,7 @@ def get_single_link(tweet_url):
     - tweet_url: a Twitter UrL
     
     Outputs:
-    - The first link contained within this status message.
+    - The tweet text and the first link contained within this status message.
     """
     
     global api
@@ -68,12 +74,17 @@ def get_single_link(tweet_url):
         tweet_id = int(tweet_id)
         status = api.get_status(tweet_id)
     except:
-        return None
+        return None, None, None
     
     if status.entities['urls']:
-        return status.entities['urls'][0]['expanded_url']
+        if 'media' in status.entities and status.entities['media']:
+            media_link = status.entities['media'][0]['expanded_url']
+        else:
+            media_link = None
+        return (status.text, media_link, 
+                status.entities['urls'][0]['expanded_url'])
     else:
-        return None
+        return None, None, None
     
     
 
