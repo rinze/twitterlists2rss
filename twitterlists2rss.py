@@ -78,7 +78,7 @@ def get_single_link(tweet_url):
     
     if status.entities['urls']:
         if 'media' in status.entities and status.entities['media']:
-            media_link = status.entities['media'][0]['expanded_url']
+            media_link = status.entities['media'][0]['media_url']
         else:
             media_link = None
         return (status.text, media_link, 
