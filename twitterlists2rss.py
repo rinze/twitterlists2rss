@@ -97,7 +97,7 @@ def get_single_link(tweet_url):
     
     
 
-def generate_html(screen_name, text, urls, tweet_url, image):
+def generate_html(screen_name, text, urls, tweet_url, tweet_id, image):
     """
     Generates a very simple HTML output with the text of the tweet
     and the URLs, if present.
@@ -107,6 +107,7 @@ def generate_html(screen_name, text, urls, tweet_url, image):
     - text: a string with the text of the tweet.
     - urls: a list containing the URLs linked in the tweet. Can be None.
     - tweet_url: the URL of the original tweet
+    - tweet_id: the string representation of the tweet ID.
     - image: the URL for the image linked in the tweet. Can be None.
 
     Output:
@@ -120,6 +121,9 @@ def generate_html(screen_name, text, urls, tweet_url, image):
         text += "</ul>"
     if image:
         text += '<p><a href="%s"><img src="%s" /></a></p>' % (image, image)
+    # Add retweet link
+    text += '<a href="https://twitter.com/intent/retweet?tweet_id=%s">Retweet</a>'\
+            % tweet_id
     return(text)
 
 def process_tweet_items(list_items):
@@ -143,7 +147,7 @@ def process_tweet_items(list_items):
         tweet_url = "https://www.twitter.com/%s/status/%s" % \
                     (l.user.screen_name, l.id_str)
         text_html = generate_html(l.user.screen_name, l.text, urls, 
-                                  tweet_url, image)
+                                  tweet_url, l.id_str, image)
         d = dict(user = l.user.name,
                  screen_name = l.user.screen_name,
                  created_at = l.created_at,
