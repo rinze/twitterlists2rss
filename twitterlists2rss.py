@@ -21,6 +21,7 @@ def recursive_link_extractor(url, n_deep = 5):
     
     original_url = url
     ref_tweet = None
+    ref_text = None
     
     origin = urlparse(url).netloc
 
@@ -38,8 +39,15 @@ def recursive_link_extractor(url, n_deep = 5):
     # depth and didn't find anything, return the original link in its
     # original form but write the text of the last retrieved one, if
     # present.
-    
-    if not url or not ref_tweet or n_deep == 0:
+    if not url and ref_text:
+        text = '<li><a href="%s">%s:</a> %s' % \
+               (ref_tweet, ref_tweet, ref_text)
+        if media_link:
+            text += '<p><a href="%s"><img src="%s" /></a></p></li>' % \
+                    (media_link, media_link)
+        else:
+            text += "</li>"
+    elif not url or not ref_tweet or n_deep == 0:
         text = '<li><a href="%s">%s</a></li>' % (original_url, original_url)
     else:
         text = '<li><a href="%s">%s</a> (from <a href="%s">%s</a>: %s)' % \
@@ -75,16 +83,17 @@ def get_single_link(tweet_url):
         status = api.get_status(tweet_id)
     except:
         return None, None, None
+
+    if 'media' in status.entities and status.entities['media']:
+        media_link = status.entities['media'][0]['media_url']
+    else:
+        media_link = None
     
     if status.entities['urls']:
-        if 'media' in status.entities and status.entities['media']:
-            media_link = status.entities['media'][0]['media_url']
-        else:
-            media_link = None
         return (status.text, media_link, 
                 status.entities['urls'][0]['expanded_url'])
     else:
-        return None, None, None
+        return status.text, media_link, None
     
     
 
